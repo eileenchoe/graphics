@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Solar System Explorer!</title>
+    <!-- FONTAWESOME -->
+    <script src="https://use.fontawesome.com/cc849767f1.js"></script>
+    <!-- BOOTSTRAP -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="webgl-demo.css" />
+  </head>
+  <body>
+    <div class="container-fluid">
+        <h1 class="text-center">Solar System Explorer!</h1><br>
+        <p class="text-center">Press Up, Down, Right, & Left Arrow Keys to Navigate</p>
+        <div class="container-canvas">
+            <canvas id="hello-webgl" width="1500" height="500">
+              Sorry, your web browser does not appear to support
+              the <code>canvas</code> element, either.
+            </canvas>
+        </div><br>
+        <p class="text-center">Planets are drawn to scale relative to the size of Jupiter, the largest planet in our Solar System. The planets' distance, velocity, and orbit were modified.</p>
+        <div class="text-center">
+            <div class="control-panel">
+                <button id="start" type="button" class="btn btn-success" style="display:none">Start <i class="fa fa-play" aria-hidden="true"></i></button>
+                <button id="pause" type="button" class="btn btn-warning">Pause <i class="fa fa-pause" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery makes some things more convenient. -->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <!-- Bootstrap JavaScript-->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <!-- GLSLUtilities is a starting point for holding functionality that
+         is common to many WebGL programs. -->
+    <script src="glsl-utilities.js"></script>
+
+    <!-- 3D Graphics Libraries -->
+    <script src="mesh-maker.js"></script>
+    <script src="tres.js"></script>
+    <script src="matrix.js"></script>
+    <script src="vector.js"></script>
+
+    <!-- Set up shaders: we've placed the source in script elements for
+        simplicity.  Shaders are ideally kept in separate files for easier
+        maintenance, but in that situation, additional code and security
+        constraints are involved. -->
+
+    <!-- The vertex shader is a complete pass-through. -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+
+      attribute vec3 vertexPosition;
+      attribute vec3 vertexColor;
+      attribute vec3 normalVector;
+
+      varying vec4 finalVertexColor;
+
+      uniform mat4 projectionMatrix;
+      uniform mat4 modelViewMatrix;
+      uniform mat4 cameraMatrix;
+
+      uniform vec3 lightPosition;
+      uniform vec3 lightEmitted;
+
+      uniform vec3 lightDiffuse;
+
+      void main(void) {
+
+          vec3 eyePosition = (modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
+          vec3 diffuseProduct = vertexColor * lightDiffuse;
+          vec3 l = normalize(lightPosition - eyePosition);
+          vec3 n = normalize(modelViewMatrix * vec4(normalVector, 0.0)).xyz;
+
+          float kd = max(dot(l, n), 0.0);
+
+          vec3 finalDiffuse = kd * diffuseProduct;
+
+          gl_Position = projectionMatrix * cameraMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
+          finalVertexColor = vec4(finalDiffuse.rgb, 1.0) + vec4(lightEmitted, 1.0);
+      }
+
+    </script>
+
+    <!-- The fragment shader produces a single unconditional color. -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+
+      varying vec4 finalVertexColor;
+
+      void main(void) {
+          gl_FragColor = vec4(finalVertexColor.rgb, 1.0);
+      }
+    </script>
+
+
+    <!-- This script sets up the specific scene for this page. -->
+    <script src="webgl-demo.js"></script>
+  </body>
+</html>

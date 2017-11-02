@@ -1,0 +1,36 @@
+<canvas id="hello-webgl" width="512" height="512">
+  Sorry, your web browser does not appear to support
+  the <code>canvas</code> element, either.
+</canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+
+  attribute vec3 vertexPosition;
+  attribute vec3 vertexColor;
+
+  varying vec4 finalVertexColor;
+
+  uniform mat4 projectionMatrix;
+  uniform mat4 modelViewMatrix;
+
+  void main(void) {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
+      finalVertexColor = vec4(vertexColor, 1.0);
+  }
+</script>
+
+<!-- The fragment shader produces a single unconditional color. -->
+<script id="fragment-shader" type="x-shader/x-fragment">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+
+  varying vec4 finalVertexColor;
+
+  void main(void) {
+      gl_FragColor = vec4((1.0 - gl_FragCoord.z) * finalVertexColor.rgb, 1.0);
+  }
+</script>
